@@ -81,11 +81,88 @@ function runSearch() {
     });
 }
 
-function viewAllEmployees() {}
-function viewEmployeesByDept() {}
-function viewEmployeesByManager() {}
-function addEmployee() {}
-function removeEmployee() {}
-function updateEmployeeRole() {}
-function updateEmployeeManager() {}
-function viewAllRoles() {}
+// View All Employees by Function
+function viewAllEmployees() {
+  const query = 'text goes here';
+  connection.query(query, function(err, res) {
+    for (let i = 0; i < res.length; i++) {
+      console.log(res[i].artist);
+    }
+    textgoeshere();
+  });
+}
+
+// View All Employees by Department Function
+function viewEmployeesByDept() {
+  const query = 'text goes here';
+  connection.query(query, function(err, res) {
+    for (let i = 0; i < res.length; i++) {
+      console.log(res[i].artist);
+    }
+    textgoeshere();
+  });
+}
+
+// View All Employees by Manager Function
+function viewEmployeesByManager() {
+  const query = 'text goes here';
+  connection.query(query, function(err, res) {
+    for (let i = 0; i < res.length; i++) {
+      console.log(res[i].artist);
+    }
+    textgoeshere();
+  });
+}
+
+// Add Employee Function
+function addEmployee() {
+  const query = 'text goes here';
+  connection.query(query, function(err, res) {
+    for (let i = 0; i < res.length; i++) {
+      console.log(res[i].artist);
+    }
+    textgoeshere();
+  });
+}
+
+// Remove Employee Function
+function removeEmployee() {
+  const query = 'text goes here';
+  connection.query(query, function(err, res) {
+    for (let i = 0; i < res.length; i++) {
+      console.log(res[i].artist);
+    }
+    textgoeshere();
+  });
+}
+// VUpdate Employee Role Function
+function updateEmployeeRole() {
+  const query = 'text goes here';
+  connection.query(query, function(err, res) {
+    for (let i = 0; i < res.length; i++) {
+      console.log(res[i].artist);
+    }
+    textgoeshere();
+  });
+}
+// Update Employee Manager Function
+function updateEmployeeManager() {
+  const query = 'text goes here';
+  connection.query(query, function(err, res) {
+    for (let i = 0; i < res.length; i++) {
+      console.log(res[i].artist);
+    }
+    textgoeshere();
+  });
+}
+
+// View All Roles Function
+function viewAllRoles() {
+  const query = 'text goes here';
+  connection.query(query, function(err, res) {
+    for (let i = 0; i < res.length; i++) {
+      console.log(res[i].artist);
+    }
+    textgoeshere();
+  });
+}
