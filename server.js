@@ -1,6 +1,6 @@
 const mysql = require('mysql');
 const inquirer = require('inquirer');
-
+const cTable = require('console.table');
 // MySQL DB Connection Information
 const connection = mysql.createConnection({
   host: 'localhost',
@@ -83,23 +83,26 @@ function runSearch() {
 
 // View All Employees by Function
 function viewAllEmployees() {
-  const query = 'text goes here';
+  // Query to view all employees
+  const query =
+    'SELECT first_employee.first_name, first_employee.last_name, second_employee.first_name as manager_first_name, second_employee.last_name as manager_last_name' +
+    ' FROM employee as first_employee' +
+    ' LEFT JOIN employee as second_employee';
   connection.query(query, function(err, res) {
-    for (let i = 0; i < res.length; i++) {
-      console.log(res[i].artist);
-    }
-    textgoeshere();
+    if (err) return err;
+    console.log('\n');
+    // Display query results using console.table
+    console.table(res);
+    runSearch();
   });
 }
 
 // View All Employees by Department Function
 function viewEmployeesByDept() {
-  const query = 'text goes here';
+  const query = `SELECT * FROM department`;
   connection.query(query, function(err, res) {
-    for (let i = 0; i < res.length; i++) {
-      console.log(res[i].artist);
-    }
-    textgoeshere();
+    console.table(res);
+    runSearch();
   });
 }
 
@@ -110,19 +113,42 @@ function viewEmployeesByManager() {
     for (let i = 0; i < res.length; i++) {
       console.log(res[i].artist);
     }
-    textgoeshere();
+    runSearch();
   });
 }
 
 // Add Employee Function
 function addEmployee() {
-  const query = 'text goes here';
-  connection.query(query, function(err, res) {
-    for (let i = 0; i < res.length; i++) {
-      console.log(res[i].artist);
-    }
-    textgoeshere();
-  });
+  inquirer
+    .prompt([
+      {
+        message: 'Enter first name of new employee:',
+        type: 'input',
+        name: 'employeeFirstName',
+      },
+      {
+        message: 'Enter last name of new employee:',
+        type: 'input',
+        name: 'employeeLastName',
+      },
+      {
+        message: 'Enter Role ID of new employee:',
+        type: 'input',
+        name: 'employeeRole',
+      },
+      {
+        message: 'Enter Manager ID of new employee:',
+        type: 'input',
+        name: 'employeeManagerId',
+      },
+    ])
+    .then(function(answer) {
+      const firstName = answer.employeeFirstName;
+      const lastName = answer.employeeLastName;
+      const roleId = answer.employeeRole;
+      const managerId = answer.employeeManagerId;
+      runSearch();
+    });
 }
 
 // Remove Employee Function
@@ -132,7 +158,7 @@ function removeEmployee() {
     for (let i = 0; i < res.length; i++) {
       console.log(res[i].artist);
     }
-    textgoeshere();
+    runSearch();
   });
 }
 // VUpdate Employee Role Function
@@ -142,7 +168,7 @@ function updateEmployeeRole() {
     for (let i = 0; i < res.length; i++) {
       console.log(res[i].artist);
     }
-    textgoeshere();
+    runSearch();
   });
 }
 // Update Employee Manager Function
@@ -152,7 +178,7 @@ function updateEmployeeManager() {
     for (let i = 0; i < res.length; i++) {
       console.log(res[i].artist);
     }
-    textgoeshere();
+    runSearch();
   });
 }
 
@@ -163,6 +189,6 @@ function viewAllRoles() {
     for (let i = 0; i < res.length; i++) {
       console.log(res[i].artist);
     }
-    textgoeshere();
+    runSearch();
   });
 }
