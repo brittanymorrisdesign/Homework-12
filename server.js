@@ -84,11 +84,9 @@ function runSearch() {
 // View All Employees by Function
 function viewAllEmployees() {
   // Query to view all employees
-  const query =
-    'SELECT first_employee.first_name, first_employee.last_name, second_employee.first_name as manager_first_name, second_employee.last_name as manager_last_name' +
-    ' FROM employee as first_employee' +
-    ' LEFT JOIN employee as second_employee';
-  connection.query(query, function(err, res) {
+  const allEmployeesQuery =
+    'SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name AS department, role.salary FROM employee LEFT JOIN role ON employee.role_id = role.id LEFT JOIN department on role.department_id = department.id;';
+  connection.query(allEmployeesQuery, function(err, res) {
     if (err) return err;
     console.log('\n');
     // Display query results using console.table
@@ -99,8 +97,7 @@ function viewAllEmployees() {
 
 // View All Employees by Department Function
 function viewEmployeesByDept() {
-  const query = `SELECT * FROM department`;
-  connection.query(query, function(err, res) {
+  connection.query('SELECT * FROM department', function(err, res) {
     console.table(res);
     runSearch();
   });
@@ -142,35 +139,105 @@ function addEmployee() {
         name: 'employeeManagerId',
       },
     ])
-    .then(function(answer) {
-      const firstName = answer.employeeFirstName;
-      const lastName = answer.employeeLastName;
-      const roleId = answer.employeeRole;
-      const managerId = answer.employeeManagerId;
-      runSearch();
-    });
+    .then(
+      function(answer) {
+        const firstName = answer.employeeFirstName;
+        const lastName = answer.employeeLastName;
+        const roleId = answer.employeeRole;
+        const managerId = answer.employeeManagerId;
+      },
+      function(err, res) {
+        if (err) {
+          throw err;
+        }
+        console.table(res);
+      }
+    );
+  runSearch();
 }
 
 // Remove Employee Function
 function removeEmployee() {
-  const query = 'text goes here';
-  connection.query(query, function(err, res) {
-    for (let i = 0; i < res.length; i++) {
-      console.log(res[i].artist);
-    }
-    runSearch();
+  connection.query('SELECT * FROM employee', (err, result) => {
+    if (err) throw err;
   });
+  const employees = result.map(
+    employee => `${employee.first_name} ${employee.last_name}`
+  );
+
+  inquirer
+    .prompt({
+      type: 'list',
+      name: 'employee',
+      message: 'Which employee do you want to remove?',
+      choices: employees,
+    })
+    .then(answer => {
+      const { employee } = answer;
+      const firstName = employee.split(' ')[0];
+      const lastName = employee.split(' ')[1];
+
+      connection.query(
+        'DELETE FROM employee WHERE first_name = ? AND last_name = ?',
+        [firstName, lastName],
+        (err, res) => {
+          if (err) throw err;
+          console.log('Employee was successfully removed.');
+        }
+      );
+      runSearch();
+    });
 }
-// VUpdate Employee Role Function
+
+// Update Employee Role Function
 function updateEmployeeRole() {
-  const query = 'text goes here';
-  connection.query(query, function(err, res) {
-    for (let i = 0; i < res.length; i++) {
-      console.log(res[i].artist);
-    }
-    runSearch();
+  connection.query('SELECT * FROM employee', (err, employeeResult) => {
+    const employees = employeeResult.map(
+      employee => `${employee.first_name} ${employee.last_name}`
+    );
+
+    connection.query('SELECT * FROM role', (err, roleResult) => {
+      const roles = roleResult.map(role => role.title);
+
+      inquirer
+        .prompt([
+          {
+            type: 'list',
+            name: 'employee',
+            message: 'Which employees role would you like to update?',
+            choices: employees,
+          },
+          {
+            type: 'list',
+            name: 'role',
+            message: 'What is the employees new role?',
+            choices: roles,
+          },
+        ])
+        .then(answer => {
+          const { id } = employeeResult.filter(
+            employee =>
+              `${employee.first_name} ${employee.last_name}` === answer.employee
+          )[0];
+          const role_id = roleResult.filter(
+            role => role.title === answer.role
+          )[0].id;
+
+          connection.query(
+            'UPDATE employee SET role_id = ? WHERE id = ?',
+            [role_id, id],
+            (err, result) => {
+              if (err) throw err;
+              console.log('Role successfully updated.');
+              console.log(res[i].artist);
+            }
+          );
+          runSearch();
+        });
+    });
   });
 }
+
 // Update Employee Manager Function
 function updateEmployeeManager() {
   const query = 'text goes here';
@@ -184,11 +251,9 @@ function updateEmployeeManager() {
 
 // View All Roles Function
 function viewAllRoles() {
-  const query = 'text goes here';
-  connection.query(query, function(err, res) {
-    for (let i = 0; i < res.length; i++) {
-      console.log(res[i].artist);
-    }
-    runSearch();
+  connection.query('SELECT * FROM role', (err, res) => {
+    if (err) throw err;
   });
+  console.table(res);
 }
+runSearch();
