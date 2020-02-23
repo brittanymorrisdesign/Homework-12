@@ -15,107 +15,131 @@ const connection = mysql.createConnection({
 });
 
 // Checks if connection was successful
-connection.connect(function(err) {
+connection.connect(err => {
   if (err) throw err;
   console.log(`connected as id ${connection.threadId}`);
-  connection.query('SELECT * FROM products', (err, res) => {
-    if (err) {
-      console.log(err);
-    }
-    console.log(res);
-  });
+  runSearch();
 });
 
 // Initial Prompt
-function runSearch() {
+const runSearch = () =>
   inquirer
-    .prompt({
-      name: 'action',
-      type: 'rawlist',
-      message: 'What would you like to do?',
-      choices: [
-        'View All Employees',
-        'View All Employees by Department',
-        'View All Employees by Manager',
-        'Add Employee',
-        'Remove Employee',
-        'Update Employee Role',
-        'Update Employee Manager',
-        'View all Roles',
-      ],
-    })
-    .then(function(answer) {
+    .prompt([
+      {
+        name: 'list',
+        type: 'rawlist',
+        message: 'What would you like to do? (Use Arrow Keys)',
+        choices: [
+          'View All Employees',
+          'View All Departments',
+          'View All Roles',
+          'Add Employee',
+          'Add Department',
+          'Add Role',
+          'Update Employee Role',
+          'Exit',
+        ],
+      },
+    ])
+    .then(answer => {
       switch (answer.action) {
         case 'View All Employees':
           viewAllEmployees();
           break;
 
-        case 'View All Employees by Department':
-          viewEmployeesByDept();
+        case 'View All Departments':
+          viewAllDepartments();
           break;
 
-        case 'View All Employees by Manager':
-          viewEmployeesByManager();
+        case 'View All Roles':
+          viewAllRoles();
           break;
 
         case 'Add Employee':
           addEmployee();
           break;
 
-        case 'Remove Employee':
-          removeEmployee();
+        case 'Add Department':
+          addDepartment();
+          break;
+
+        case 'Add Role':
+          addRole();
           break;
 
         case 'Update Employee Role':
           updateEmployeeRole();
           break;
 
-        case 'Update Employee Manager':
-          updateEmployeeManager();
-          break;
-
-        case 'View all Roles':
-          viewAllRoles();
+        case 'Exit':
+          connection.end();
           break;
       }
     });
-}
 
 // View All Employees by Function
-function viewAllEmployees() {
+const viewAllEmployees = () => {
   // Query to view all employees
-  const allEmployeesQuery =
-    'SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name AS department, role.salary FROM employee LEFT JOIN role ON employee.role_id = role.id LEFT JOIN department on role.department_id = department.id;';
-  connection.query(allEmployeesQuery, function(err, res) {
-    if (err) return err;
-    console.log('\n');
-    // Display query results using console.table
-    console.table(res);
-    runSearch();
-  });
-}
-
-// View All Employees by Department Function
-function viewEmployeesByDept() {
-  connection.query('SELECT * FROM department', function(err, res) {
-    console.table(res);
-    runSearch();
-  });
-}
-
-// View All Employees by Manager Function
-function viewEmployeesByManager() {
-  const query = 'text goes here';
-  connection.query(query, function(err, res) {
-    for (let i = 0; i < res.length; i++) {
-      console.log(res[i].artist);
+  connection.query(
+    `
+    SELECT 
+        employee.id, 
+        employee.first_name AS 'First Name',
+        employee.last_name AS 'Last Name',
+        role.title AS 'Title',
+        department.name AS 'Department',
+        role.salary AS 'Salary',
+        CONCAT(e.first_name , ' ' , e.last_name) AS 'Manager'
+    FROM employee 
+    INNER JOIN role ON employee.role_id = role.id 
+    LEFT JOIN department ON role.department_id = department.id
+    LEFT JOIN employee e ON employee.manager_id = e.id
+    ORDER BY employee.id;
+    `,
+    (err, res) => {
+      if (err) throw err;
+      // Display query results using console.table
+      console.log('\n');
+      console.table(res);
+      runSearch();
     }
-    runSearch();
-  });
-}
+  );
+};
+
+// View All Departments by Function
+const viewAllDepartments = () =>
+  connection.query(
+    'SELECT id, name AS department FROM department',
+    (err, res) => {
+      if (err) throw err;
+      console.table(res);
+      runSearch();
+    }
+  );
+
+// View All Roles by Function
+const viewAllRoles = () => {
+  connection.query(
+    `
+    SELECT 
+        role.id,
+        role.title AS 'Title',
+        role.salary AS 'Salary',
+        department.name AS 'Department'
+    FROM role
+    LEFT JOIN department ON role.department_id = department.id;
+    `,
+    (err, res) => {
+      if (err) throw err;
+      console.log('\n');
+      console.table(res);
+      runSearch();
+    }
+  );
+};
 
 // Add Employee Function
-function addEmployee() {
+const addEmployee = () =>
   inquirer
     .prompt([
       {
@@ -139,58 +163,91 @@ function addEmployee() {
         name: 'employeeManagerId',
       },
     ])
-    .then(
-      function(answer) {
-        const firstName = answer.employeeFirstName;
-        const lastName = answer.employeeLastName;
-        const roleId = answer.employeeRole;
-        const managerId = answer.employeeManagerId;
-      },
-      function(err, res) {
-        if (err) {
-          throw err;
-        }
-        console.table(res);
-      }
-    );
-  runSearch();
-}
-
-// Remove Employee Function
-function removeEmployee() {
-  connection.query('SELECT * FROM employee', (err, result) => {
-    if (err) throw err;
-  });
-  const employees = result.map(
-    employee => `${employee.first_name} ${employee.last_name}`
-  );
-
-  inquirer
-    .prompt({
-      type: 'list',
-      name: 'employee',
-      message: 'Which employee do you want to remove?',
-      choices: employees,
-    })
     .then(answer => {
-      const { employee } = answer;
-      const firstName = employee.split(' ')[0];
-      const lastName = employee.split(' ')[1];
-
       connection.query(
-        'DELETE FROM employee WHERE first_name = ? AND last_name = ?',
-        [firstName, lastName],
-        (err, res) => {
-          if (err) throw err;
-          console.log('Employee was successfully removed.');
+        'INSERT INTO employee SET ?',
+        {
+          first_name: answer.employeeFirstName,
+          last_name: answer.employeeLastName,
+          role_id: answer.employeeRole,
+          manager_id: answer.emplyeeManagerId,
+        },
+        function(err, res) {
+          if (err) {
+            throw err;
+          }
+          console.log(
+            `You have entered ${answer.employeeFirstName} ${answer.employeeLastName} into your employee database.`
+          );
+          runSearch();
         }
       );
-      runSearch();
     });
-}
+
+// Add department Function
+const addDepartment = () =>
+  inquirer
+    .prompt([
+      {
+        type: 'input',
+        name: 'deptName',
+        message: 'What department would you like to add?',
+      },
+    ])
+    .then(answer => {
+      connection.query(
+        'INSERT INTO department (name) VALUES (?)',
+        answer.deptName,
+        function(err, res) {
+          if (err) throw err;
+          console.log(
+            `You have entered ${answer.deptName} into your department database.`
+          );
+          runSearch();
+        }
+      );
+    });
+
+// Add role Function
+const addRole = () =>
+  inquirer
+    .prompt([
+      {
+        type: 'input',
+        name: 'addRole',
+        message: 'What role would you like to add?',
+      },
+      {
+        type: 'input',
+        name: 'roleSalary',
+        message: 'What is the salary for this role?',
+      },
+      {
+        type: 'input',
+        name: 'departmentID',
+        message: "What is this role's department id?",
+      },
+    ])
+    .then(answer => {
+      connection.query(
+        'INSERT INTO role SET ?',
+        {
+          title: answer.addRole,
+          salary: answer.roleSalary,
+          department_id: answer.departmentID,
+        },
+        function(err, res) {
+          if (err) throw err;
+          console.log(
+            `You have entered ${answer.addRole} into your role database.`
+          );
+          runSearch();
+        }
+      );
+    });
 
 // Update Employee Role Function
-function updateEmployeeRole() {
+const updateEmployeeRole = () =>
   connection.query('SELECT * FROM employee', (err, employeeResult) => {
     const employees = employeeResult.map(
       employee => `${employee.first_name} ${employee.last_name}`
@@ -236,24 +293,3 @@ function updateEmployeeRole() {
         });
     });
   });
-}
-
-// Update Employee Manager Function
-function updateEmployeeManager() {
-  const query = 'text goes here';
-  connection.query(query, function(err, res) {
-    for (let i = 0; i < res.length; i++) {
-      console.log(res[i].artist);
-    }
-    runSearch();
-  });
-}
-
-// View All Roles Function
-function viewAllRoles() {
-  connection.query('SELECT * FROM role', (err, res) => {
-    if (err) throw err;
-  });
-  console.table(res);
-}
-runSearch();
