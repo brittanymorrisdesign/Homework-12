@@ -5,6 +5,8 @@ Objective: Developers are often tasked with creating interfaces that make it eas
 Github Page: https://brittanymorrisdesign.github.io/Homework-12 </br>
 Live Demo: https://desolate-falls-84449.herokuapp.com/
 
+![employee](https://user-images.githubusercontent.com/44029053/75103687-1a3b3a80-55cc-11ea-9185-7aba973bbc30.gif)
+
 ```
 As a business owner
 I want to be able to view and manage the departments, roles, and employees in my company
@@ -25,5 +27,5 @@ Build a command-line application that at a minimum allows the user to:
 
 # Dependencies
 * inquirer
-* path
+* console table
 * mysql
