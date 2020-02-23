@@ -21,5 +21,9 @@
     "console.table": "^0.10.0",
     "inquirer": "^7.0.4",
     "mysql": "^2.18.1"
+  },
+  "scripts": {
+    "start": "node server.js"
   }
 }
+
