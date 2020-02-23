@@ -1,6 +1,7 @@
 const mysql = require('mysql');
 const inquirer = require('inquirer');
 const cTable = require('console.table');
+
 // MySQL DB Connection Information
 const connection = mysql.createConnection({
   host: 'localhost',
@@ -245,49 +246,62 @@ const addRole = () =>
     });
 
 // Update Employee Role Function
-const updateEmployeeRole = () =>
-  connection.query('SELECT * FROM employee', (err, employeeResult) => {
-    const employees = employeeResult.map(
-      employee => `${employee.first_name} ${employee.last_name}`
-    );
+const updateEmployeeRole = () => {
+  const employeeArray = [];
+  const roleArray = [];
+  connection.query(
+    `SELECT CONCAT (employee.first_name, ' ', employee.last_name) as employee FROM employee_trackerDB.employee`,
+    (err, res) => {
+      if (err) throw err;
+      for (let i = 0; i < res.length; i++) {
+        employeeArray.push(res[i].employee);
+      }
+      connection.query(
+        `SELECT title FROM employee_trackerDB.role`,
+        (err, res) => {
+          if (err) throw err;
+          for (let i = 0; i < res.length; i++) {
+            roleArray.push(res[i].title);
+          }
 
-    connection.query('SELECT * FROM role', (err, roleResult) => {
-      const roles = roleResult.map(role => role.title);
-
-      inquirer
-        .prompt([
-          {
-            type: 'list',
-            name: 'employee',
-            message: 'Which employees role would you like to update?',
-            choices: employees,
-          },
-          {
-            type: 'list',
-            name: 'role',
-            message: 'What is the employees new role?',
-            choices: roles,
-          },
-        ])
-        .then(answer => {
-          const { id } = employeeResult.filter(
-            employee =>
-              `${employee.first_name} ${employee.last_name}` === answer.employee
-          )[0];
-          const role_id = roleResult.filter(
-            role => role.title === answer.role
-          )[0].id;
-
-          connection.query(
-            'UPDATE employee SET role_id = ? WHERE id = ?',
-            [role_id, id],
-            (err, result) => {
-              if (err) throw err;
-              console.log('Role successfully updated.');
-              console.log(res[i].artist);
-            }
-          );
-          runSearch();
-        });
-    });
-  });
+          inquirer
+            .prompt([
+              {
+                name: 'name',
+                type: 'list',
+                message: `Who's role would you like to change?`,
+                choices: employeeArray,
+              },
+              {
+                name: 'role',
+                type: 'list',
+                message: 'What would you like to change their role to?',
+                choices: roleArray,
+              },
+            ])
+            .then(answers => {
+              let currentRole;
+              const name = answers.name.split(' ');
+              connection.query(
+                `SELECT id FROM employee_trackerDB.role WHERE title = '${answers.role}'`,
+                (err, res) => {
+                  if (err) throw err;
+                  for (let i = 0; i < res.length; i++) {
+                    currentRole = res[i].id;
+                  }
+                  connection.query(
+                    `UPDATE employee_trackerDB.employee SET role_id = ${currentRole} WHERE first_name= '${name[0]}' AND last_name= '${name[1]}';`,
+                    (err, res) => {
+                      if (err) throw err;
+                      console.log(`You have successfully upated the role.`);
+                      runSearch();
+                    }
+                  );
+                }
+              );
+            });
+        }
+      );
+    }
+  );
+};
