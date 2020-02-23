@@ -1,65 +1,35 @@
 USE employee_trackerDB;
 
 -- Department Seeds --
-INSERT INTO department (id, name)
-VALUES (1, 'Sales');
-
-INSERT INTO department (id, name)
-VALUES (2, 'Engineering');
-
-INSERT INTO department (id, name)
-VALUES (3, 'Finance');
-
-INSERT INTO department (id, name)
-VALUES (4, 'Legal');
+INSERT INTO department(name)
+VALUES
+    ("Company"),
+    ("Engineering"),
+    ("Legal"),
+    ("Sales"),
+    ("Finance");
 
 -- Role Seeds --
 INSERT INTO role (title, salary, department_id) 
-VALUES ('Sales Lead', 43000, 1);
-
-INSERT INTO role (title, salary, department_id) 
-VALUES ('Salesperson', 60000, 1);
-
-INSERT INTO role (title, salary, department_id) 
-VALUES ('Lead Engineer', 80000, 2);
-
-INSERT INTO role (title, salary, department_id) 
-VALUES ('Software Engineer', 90000, 2);
-
-INSERT INTO role (title, salary, department_id) 
-VALUES ('Account Manager', 50000, 3);
-
-INSERT INTO role (title, salary, department_id) 
-VALUES ('Accountant', 90000, 4);
-
-INSERT INTO role (title, salary, department_id) 
-VALUES ('Legal Team Lead', 100000, 4);
-
-SELECT * FROM role;
+VALUES
+    ("CEO", 350000, 1),
+    ("Lead Engineer", 150000, 2),
+    ("Engineer", 120000, 2),
+    ("Legal Team Lead", 250000, 3),
+    ("Lawyer", 190000, 3),
+    ("Sales Lead", 100000, 4),
+    ("Salesperson", 80000, 4),
+    ("Finance Lead", 160000, 5),
+    ("Accountant", 125000, 5);
 
 -- Employee Seeds --
 INSERT INTO employee (first_name, last_name, role_id, manager_id) 
-VALUES (4, 'John', 'Doe', 3, null);
-
-INSERT INTO employee (first_name, last_name, role_id, manager_id) 
-VALUES (4, 'Mike', 'Chan', 4, null);
-
-INSERT INTO employee (first_name, last_name, role_id, manager_id) 
-VALUES (4, 'Ashley', 'Rodriguez', 6, null);
-
-INSERT INTO employee (first_name, last_name, role_id, manager_id) 
-VALUES (4, 'Kevin', 'Tupik', 9, null);
-
-INSERT INTO employee (first_name, last_name, role_id, manager_id) 
-VALUES (4, 'Malia', 'Brown', 2, null);
-
-INSERT INTO employee (first_name, last_name, role_id, manager_id) 
-VALUES (4, 'Sarah', 'Lourd', 1, null);
-
-INSERT INTO employee (first_name, last_name, role_id, manager_id) 
-VALUES (4, 'Tom', 'Allen', 7, null);
-
-INSERT INTO employee (first_name, last_name, role_id, manager_id) 
-VALUES (4, 'Tammer', 'Galal', 8, null);
-
-SELECT * FROM employee;
+VALUES 
+('John', 'Doe', 1, null),
+('Mike', 'Chan', 3, 2),
+('Ashley', 'Rodriguez', 4, 1),
+('Kevin', 'Tupik', 5, 4);
+('Malia', 'Brown', 6, 1);
+('Sarah', 'Lourd', 7, 6),
+('Tom', 'Allen', 8, 1),
+('Tammer', 'Galal', 9, 8);
