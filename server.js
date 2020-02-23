@@ -26,8 +26,8 @@ const runSearch = () =>
   inquirer
     .prompt([
       {
-        name: 'list',
-        type: 'rawlist',
+        name: 'action',
+        type: 'list',
         message: 'What would you like to do? (Use Arrow Keys)',
         choices: [
           'View All Employees',
@@ -170,14 +170,12 @@ const addEmployee = () =>
           first_name: answer.employeeFirstName,
           last_name: answer.employeeLastName,
           role_id: answer.employeeRole,
-          manager_id: answer.emplyeeManagerId,
+          manager_id: answer.employeeManagerId,
         },
         function(err, res) {
-          if (err) {
-            throw err;
-          }
+          if (err) throw err;
           console.log(
-            `You have entered ${answer.employeeFirstName} ${answer.employeeLastName} into your employee database.`
+            `You have entered ${answer.employeeFirstName} ${answer.employeeLastName} in the employee database.`
           );
           runSearch();
         }
